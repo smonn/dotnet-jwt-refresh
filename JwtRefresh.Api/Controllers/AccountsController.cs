@@ -1,13 +1,9 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
-using JwtRefresh.Api.ViewModels;
 using JwtRefresh.Models;
-using JwtRefresh.Repositories;
+using JwtRefresh.Services.Extensions;
+using JwtRefresh.Services.Accounts;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using MongoDB.Driver;
 
 namespace JwtRefresh.Api.Controllers
 {
@@ -16,36 +12,38 @@ namespace JwtRefresh.Api.Controllers
     [Authorize]
     public class AccountsController : ControllerBase
     {
-        private readonly IAccountRepository _accountRepository;
+        private readonly IAccountService _accountService;
 
-        public AccountsController(IAccountRepository accountRepository)
+        public AccountsController(IAccountService accountService)
         {
-            _accountRepository = accountRepository;
+            _accountService = accountService;
+        }
+
+        [HttpGet]
+        public async Task<ActionResult<GetAccountResponse>> Get()
+        {
+            var request = new GetAccountRequest
+            {
+                AccountId = User.GetAccountId(),
+            };
+            var response = await _accountService.GetAsync(request);
+            if (response.Error == null)
+            {
+                return Ok(response);
+            }
+            return NotFound(response);
         }
 
         [HttpPost]
         [AllowAnonymous]
-        public async Task<ActionResult<Account>> Post([FromBody] CreateAccountRequest request)
+        public async Task<ActionResult<CreateAccountResponse>> Post([FromBody] CreateAccountRequest request)
         {
-            try
+            var response = await _accountService.RegisterAsync(request);
+            if (response.Error == null)
             {
-                var account = new Account
-                {
-                    Username = request.Username,
-                    Password = BCrypt.Net.BCrypt.EnhancedHashPassword(request.Password),
-                };
-                await _accountRepository.CreateAsync(account);
-                var response = new CreateAccountResponse
-                {
-                    Id = account.Id,
-                    Username = account.Username,
-                };
-                return Ok(new { Account = response });
+                return Ok(response);
             }
-            catch (MongoWriteException)
-            {
-                return BadRequest(new { Error = "Username is already in use." });
-            }
+            return BadRequest(response);
         }
     }
 }
