@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using JwtRefresh.Repositories;
+using JwtRefresh.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -48,8 +49,8 @@ namespace JwtRefresh.Api
 
             services.AddScoped(provider => new MongoClient(Configuration.GetConnectionString("Default")));
             services.AddScoped(provider => provider.GetService<MongoClient>().GetDatabase(Configuration["Database:Name"]));
-            services.AddScoped<IAccountRepository, AccountRepository>();
-            services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
+            services.AddRepositories();
+            services.AddServices();
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
         }

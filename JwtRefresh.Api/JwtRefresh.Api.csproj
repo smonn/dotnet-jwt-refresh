@@ -15,6 +15,7 @@
   <ItemGroup>
     <ProjectReference Include="..\JwtRefresh.Models\JwtRefresh.Models.csproj" />
     <ProjectReference Include="..\JwtRefresh.Repositories\JwtRefresh.Repositories.csproj" />
+    <ProjectReference Include="..\JwtRefresh.Services\JwtRefresh.Services.csproj" />
   </ItemGroup>
 
 </Project>
