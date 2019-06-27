@@ -8,7 +8,7 @@ namespace JwtRefresh.Repositories
     public class AccountRepository : RepositoryBase<Account>, IAccountRepository
     {
         public AccountRepository(IMongoDatabase database)
-            : base(database, "Accounts")
+            : base(database, "accounts")
         {
         }
 

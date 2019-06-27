@@ -59,16 +59,11 @@ namespace JwtRefresh.Services.Login
         {
             try
             {
-                var token = await _refreshTokenRepository.FindByValueAsync(request.RefreshToken);
-                if (token == null)
-                {
-                    return new LoginResponse { Error = "Invalid access token and/or refresh token" };
-                }
-
                 var user = CryptoUtils.GetClaimsPrincipalFromExpiredToken(request.AccessToken, _configuration);
                 var accountId = user.GetAccountId();
 
-                if (token.AccountId != accountId)
+                var token = await _refreshTokenRepository.FindByAccountIdAndValueAsync(accountId, request.RefreshToken);
+                if (token == null)
                 {
                     return new LoginResponse { Error = "Invalid access token and/or refresh token" };
                 }

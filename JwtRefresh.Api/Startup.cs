@@ -15,7 +15,10 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Conventions;
 using MongoDB.Driver;
+using Newtonsoft.Json.Serialization;
 
 namespace JwtRefresh.Api
 {
@@ -51,12 +54,27 @@ namespace JwtRefresh.Api
                     };
                 });
 
+            var conventionPack = new ConventionPack();
+            conventionPack.Add(new IgnoreExtraElementsConvention(true));
+            conventionPack.Add(new EnumRepresentationConvention(BsonType.String));
+            conventionPack.Add(new SnakeCaseElementNameConvention());
+            ConventionRegistry.Register("default", conventionPack, t => t.FullName.StartsWith("JwtRefresh."));
+
             services.AddScoped(provider => new MongoClient(Configuration.GetConnectionString("Default")));
             services.AddScoped(provider => provider.GetService<MongoClient>().GetDatabase(Configuration["Database:Name"]));
+
             services.AddRepositories();
             services.AddServices();
 
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+            services.AddMvc()
+                .SetCompatibilityVersion(CompatibilityVersion.Version_2_2)
+                .AddJsonOptions(options =>
+                {
+                    options.SerializerSettings.ContractResolver = new DefaultContractResolver
+                    {
+                        NamingStrategy = new SnakeCaseNamingStrategy(),
+                    };
+                });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

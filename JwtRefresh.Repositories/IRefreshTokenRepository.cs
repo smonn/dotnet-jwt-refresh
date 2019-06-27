@@ -6,7 +6,6 @@ namespace JwtRefresh.Repositories
 {
     public interface IRefreshTokenRepository : IRepository<RefreshToken>
     {
-        Task<RefreshToken> FindByValueAsync(string value);
-        Task<RefreshToken> FindByAccountIdAsync(ObjectId accountId);
+        Task<RefreshToken> FindByAccountIdAndValueAsync(ObjectId accountId, string value);
     }
 }

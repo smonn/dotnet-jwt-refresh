@@ -8,23 +8,14 @@ namespace JwtRefresh.Repositories
 {
     public class RefreshTokenRepository : RepositoryBase<RefreshToken>, IRefreshTokenRepository
     {
-        public RefreshTokenRepository(IMongoDatabase database) : base(database, "RefreshTokens")
+        public RefreshTokenRepository(IMongoDatabase database) : base(database, "refresh_tokens")
         {
         }
 
-        public async Task<RefreshToken> FindByAccountIdAsync(ObjectId accountId)
+        public async Task<RefreshToken> FindByAccountIdAndValueAsync(ObjectId accountId, string value)
         {
             var filter = Builders<RefreshToken>.Filter.And(
                 Builders<RefreshToken>.Filter.Eq(x => x.AccountId, accountId),
-                Builders<RefreshToken>.Filter.Eq(x => x.IsRevoked, false),
-                Builders<RefreshToken>.Filter.Gt(x => x.Expires, DateTime.UtcNow)
-            );
-            return await _collection.Find(filter).FirstOrDefaultAsync();
-        }
-
-        public async Task<RefreshToken> FindByValueAsync(string value)
-        {
-            var filter = Builders<RefreshToken>.Filter.And(
                 Builders<RefreshToken>.Filter.Eq(x => x.Value, value),
                 Builders<RefreshToken>.Filter.Eq(x => x.IsRevoked, false),
                 Builders<RefreshToken>.Filter.Gt(x => x.Expires, DateTime.UtcNow)

@@ -74,7 +74,7 @@ namespace JwtRefresh.Services.Accounts
             }
             catch (MongoWriteException)
             {
-                return new CreateAccountResponse { Error = "Username is already in use" };
+                return new CreateAccountResponse { Error = "Username and/or email address is already in use" };
             }
             catch (Exception ex)
             {
