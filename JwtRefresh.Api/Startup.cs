@@ -37,12 +37,16 @@ namespace JwtRefresh.Api
                     options.TokenValidationParameters = new TokenValidationParameters
                     {
                         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["Auth:Secret"])),
-                        ValidAudience = Configuration["Auth:Audience"],
-                        ValidIssuer = Configuration["Auth:Issuer"],
-                        ValidateAudience = true,
-                        ValidateIssuer = true,
                         ValidateIssuerSigningKey = true,
+
+                        ValidAudience = Configuration["Auth:Audience"],
+                        ValidateAudience = true,
+
+                        ValidIssuer = Configuration["Auth:Issuer"],
+                        ValidateIssuer = true,
+
                         ValidateLifetime = true,
+
                         ClockSkew = TimeSpan.Zero,
                     };
                 });

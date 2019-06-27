@@ -1,7 +1,7 @@
 using System.Security.Claims;
 using MongoDB.Bson;
 
-namespace JwtRefresh.Api.Extensions
+namespace JwtRefresh.Services.Extensions
 {
     public static class ClaimsPrincipalExtensions
     {

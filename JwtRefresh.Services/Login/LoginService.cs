@@ -2,8 +2,10 @@
 using System.Threading.Tasks;
 using JwtRefresh.Models;
 using JwtRefresh.Repositories;
+using JwtRefresh.Services.Extensions;
 using JwtRefresh.Services.Utils;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 
 namespace JwtRefresh.Services.Login
 {
@@ -12,12 +14,14 @@ namespace JwtRefresh.Services.Login
         private readonly IAccountRepository _accountRepository;
         private readonly IRefreshTokenRepository _refreshTokenRepository;
         private readonly IConfiguration _configuration;
+        private readonly ILogger<LoginService> _logger;
 
-        public LoginService(IAccountRepository accountRepository, IRefreshTokenRepository refreshTokenRepository, IConfiguration configuration)
+        public LoginService(IAccountRepository accountRepository, IRefreshTokenRepository refreshTokenRepository, IConfiguration configuration, ILogger<LoginService> logger)
         {
             _accountRepository = accountRepository;
             _refreshTokenRepository = refreshTokenRepository;
             _configuration = configuration;
+            _logger = logger;
         }
 
         public async Task<LoginResponse> LoginAsync(LoginRequest request)
@@ -42,9 +46,10 @@ namespace JwtRefresh.Services.Login
                     };
                 }
             }
-            catch
+            catch (Exception ex)
             {
                 // swallow for now
+                _logger.LogError(ex, "Failed to authenticate user");
             }
 
             return new LoginResponse { Error = "Invalid username and/or password" };
@@ -57,7 +62,15 @@ namespace JwtRefresh.Services.Login
                 var token = await _refreshTokenRepository.FindByValueAsync(request.RefreshToken);
                 if (token == null)
                 {
-                    return new LoginResponse { Error = "Invalid refresh token" };
+                    return new LoginResponse { Error = "Invalid access token and/or refresh token" };
+                }
+
+                var user = CryptoUtils.GetClaimsPrincipalFromExpiredToken(request.AccessToken, _configuration);
+                var accountId = user.GetAccountId();
+
+                if (token.AccountId != accountId)
+                {
+                    return new LoginResponse { Error = "Invalid access token and/or refresh token" };
                 }
 
                 var account = await _accountRepository.FindByIdAsync(token.AccountId);
@@ -72,12 +85,13 @@ namespace JwtRefresh.Services.Login
                     RefreshToken = token.Value,
                 };
             }
-            catch
+            catch (Exception ex)
             {
                 // swallow for now
+                _logger.LogError(ex, "Failed to process refresh token");
             }
 
-            return new LoginResponse { Error = "Invalid refresh token" };
+            return new LoginResponse { Error = "Invalid access token and/or refresh token" };
         }
     }
 }

@@ -37,7 +37,7 @@ namespace JwtRefresh.Services.Utils
                     }),
                 SigningCredentials = new SigningCredentials(
                     new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secret)),
-                    SecurityAlgorithms.HmacSha256Signature
+                    SecurityAlgorithms.HmacSha256
                 ),
                 Expires = expires,
                 Issuer = issuer,
@@ -56,6 +56,38 @@ namespace JwtRefresh.Services.Utils
         public static bool VerifyPassword(string password, string hash)
         {
             return BCrypt.Net.BCrypt.EnhancedVerify(password, hash);
+        }
+
+        public static ClaimsPrincipal GetClaimsPrincipalFromExpiredToken(string accessToken, IConfiguration configuration)
+        {
+            var secret = configuration["Auth:Secret"];
+            var issuer = configuration["Auth:Issuer"];
+            var audience = configuration["Auth:Audience"];
+            var expires = DateTime.UtcNow.AddSeconds(Convert.ToDouble(configuration["Auth:ExpiresInSeconds"]));
+            var tokenValidationParameters = new TokenValidationParameters
+            {
+                ValidateAudience = true,
+                ValidAudience = audience,
+
+                ValidateIssuer = true,
+                ValidIssuer = issuer,
+
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secret)),
+
+                // ignore expiration date on token
+                ValidateLifetime = false,
+            };
+
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var principal = tokenHandler.ValidateToken(accessToken, tokenValidationParameters, out var validatedToken);
+            var jwtSecurityToken = validatedToken as JwtSecurityToken;
+            if (jwtSecurityToken == null || !jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase))
+            {
+                throw new SecurityTokenException("Invalid token");
+            }
+
+            return principal;
         }
     }
 }
