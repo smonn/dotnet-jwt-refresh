@@ -2,6 +2,23 @@
 
 Example of a .NET Core Web API using MongoDB with JWT authentication and support for refresh tokens.
 
+## Assumes these unique indexes are created
+
+```javascript
+db.getCollection('accounts').createIndex(
+    { username: 1 },
+    { unique: true, background: true }
+);
+db.getCollection('accounts').createIndex(
+    { email_address: 1 },
+    { unique: true, background: true }
+);
+db.getCollection('refresh_tokens').createIndex(
+    { account_id: 1, value: 1 },
+    { unique: true, background: true }
+);
+```
+
 ## Sample requests
 
 ### Create a new account
