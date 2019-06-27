@@ -26,7 +26,7 @@ namespace JwtRefresh.Services.Utils
             var secret = configuration["Auth:Secret"];
             var issuer = configuration["Auth:Issuer"];
             var audience = configuration["Auth:Audience"];
-            var expires = DateTime.UtcNow.AddSeconds(Convert.ToDouble(configuration["Auth:ExpiresInSeconds"]));
+            var expires = DateTime.UtcNow.AddMinutes(Convert.ToDouble(configuration["Auth:AccessTokenExpiresInMinutes"]));
 
             var tokenHandler = new JwtSecurityTokenHandler();
             var tokenDescriptor = new SecurityTokenDescriptor
@@ -42,6 +42,7 @@ namespace JwtRefresh.Services.Utils
                 Expires = expires,
                 Issuer = issuer,
                 Audience = audience,
+                NotBefore = DateTime.UtcNow,
             };
 
             var securityToken = tokenHandler.CreateToken(tokenDescriptor);
@@ -63,7 +64,7 @@ namespace JwtRefresh.Services.Utils
             var secret = configuration["Auth:Secret"];
             var issuer = configuration["Auth:Issuer"];
             var audience = configuration["Auth:Audience"];
-            var expires = DateTime.UtcNow.AddSeconds(Convert.ToDouble(configuration["Auth:ExpiresInSeconds"]));
+            var expires = DateTime.UtcNow.AddMinutes(Convert.ToDouble(configuration["Auth:AccessTokenExpiresInMinutes"]));
             var tokenValidationParameters = new TokenValidationParameters
             {
                 ValidateAudience = true,

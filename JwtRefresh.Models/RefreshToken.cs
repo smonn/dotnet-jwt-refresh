@@ -8,6 +8,6 @@ namespace JwtRefresh.Models
         public ObjectId AccountId { get; set; }
         public string Value { get; set; }
         public bool IsRevoked { get; set; }
-        public DateTime LastUsed { get; set; }
+        public DateTime Expires { get; set; }
     }
 }

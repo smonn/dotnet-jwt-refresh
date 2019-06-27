@@ -1,3 +1,4 @@
+using System;
 using System.Threading.Tasks;
 using JwtRefresh.Models;
 using MongoDB.Bson;
@@ -15,7 +16,8 @@ namespace JwtRefresh.Repositories
         {
             var filter = Builders<RefreshToken>.Filter.And(
                 Builders<RefreshToken>.Filter.Eq(x => x.AccountId, accountId),
-                Builders<RefreshToken>.Filter.Eq(x => x.IsRevoked, false)
+                Builders<RefreshToken>.Filter.Eq(x => x.IsRevoked, false),
+                Builders<RefreshToken>.Filter.Gt(x => x.Expires, DateTime.UtcNow)
             );
             return await _collection.Find(filter).FirstOrDefaultAsync();
         }
@@ -24,7 +26,8 @@ namespace JwtRefresh.Repositories
         {
             var filter = Builders<RefreshToken>.Filter.And(
                 Builders<RefreshToken>.Filter.Eq(x => x.Value, value),
-                Builders<RefreshToken>.Filter.Eq(x => x.IsRevoked, false)
+                Builders<RefreshToken>.Filter.Eq(x => x.IsRevoked, false),
+                Builders<RefreshToken>.Filter.Gt(x => x.Expires, DateTime.UtcNow)
             );
             return await _collection.Find(filter).FirstOrDefaultAsync();
         }
@@ -32,7 +35,7 @@ namespace JwtRefresh.Repositories
         protected override UpdateDefinition<RefreshToken> BuildUpdateDefinition(RefreshToken model)
         {
             return Builders<RefreshToken>.Update
-                .Set(x => x.LastUsed, model.LastUsed)
+                .Set(x => x.Expires, model.Expires)
                 .Set(x => x.Value, model.Value)
                 .Set(x => x.IsRevoked, model.IsRevoked);
         }

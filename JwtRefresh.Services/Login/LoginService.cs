@@ -35,7 +35,7 @@ namespace JwtRefresh.Services.Login
                     var refreshToken = new RefreshToken
                     {
                         AccountId = account.Id,
-                        LastUsed = DateTime.UtcNow,
+                        Expires = DateTime.UtcNow.AddDays(Convert.ToDouble(_configuration["Auth:RefreshTokenExpiresInDays"])),
                         Value = CryptoUtils.RandomString(),
                     };
                     await _refreshTokenRepository.CreateAsync(refreshToken);
@@ -76,7 +76,7 @@ namespace JwtRefresh.Services.Login
                 var account = await _accountRepository.FindByIdAsync(token.AccountId);
                 var accessToken = CryptoUtils.CreateAccessToken(account, _configuration);
                 token.Value = CryptoUtils.RandomString();
-                token.LastUsed = DateTime.UtcNow;
+                token.Expires = DateTime.UtcNow.AddDays(Convert.ToDouble(_configuration["Auth:RefreshTokenExpiresInDays"]));
                 await _refreshTokenRepository.UpdateAsync(token.Id, token);
 
                 return new LoginResponse
