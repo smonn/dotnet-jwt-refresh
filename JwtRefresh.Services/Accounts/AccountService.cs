@@ -1,10 +1,10 @@
-using System.Threading.Tasks;
-using JwtRefresh.Repositories;
-using JwtRefresh.Models;
-using MongoDB.Driver;
-using JwtRefresh.Services.Utils;
-using Microsoft.Extensions.Logging;
 using System;
+using System.Threading.Tasks;
+using JwtRefresh.Models;
+using JwtRefresh.Repositories;
+using JwtRefresh.Services.Utils;
+using MongoDB.Driver;
+using Microsoft.Extensions.Logging;
 
 namespace JwtRefresh.Services.Accounts
 {

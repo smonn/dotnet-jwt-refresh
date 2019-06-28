@@ -1,5 +1,4 @@
 using System.Threading.Tasks;
-using JwtRefresh.Models;
 using JwtRefresh.Services.Extensions;
 using JwtRefresh.Services.Accounts;
 using Microsoft.AspNetCore.Authorization;
